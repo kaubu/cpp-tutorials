@@ -31,7 +31,7 @@ bool doesPieceFit(int nTetromino, int nRotation, int nPosX, int nPosY)
 {
 	for (int px{ 0 }; px < 4; ++px)
 	{
-		for (int py{ 0 }; py < 4; ++px)
+		for (int py{ 0 }; py < 4; ++py)
 		{
 			// Get index into piece
 			int pi{ Rotate(px, py, nRotation) };
@@ -64,40 +64,19 @@ int main()
 		MoveWindow(hwnd, 200, 200, 680, 400, TRUE);
 	}*/
 
-	tetromino[0].append(L"..X.");
-	tetromino[0].append(L"..X.");
-	tetromino[0].append(L"..X.");
-	tetromino[0].append(L"..X.");
+	wchar_t *screen{ new wchar_t[nScreenWidth * nScreenHeight] };
+	for (int i{ 0 }; i < (nScreenWidth * nScreenHeight); ++i) { screen[i] = L' '; }
+	HANDLE hConsole{ CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL) };
+	SetConsoleActiveScreenBuffer(hConsole);
+	DWORD dwBytesWritten{ 0 };
 
-	tetromino[1].append(L"..X.");
-	tetromino[1].append(L".XX.");
-	tetromino[1].append(L".X..");
-	tetromino[1].append(L"....");
-
-	tetromino[2].append(L".X..");
-	tetromino[2].append(L".XX.");
-	tetromino[2].append(L"..X.");
-	tetromino[2].append(L"....");
-
-	tetromino[3].append(L"....");
-	tetromino[3].append(L".XX.");
-	tetromino[3].append(L".XX.");
-	tetromino[3].append(L"....");
-
-	tetromino[4].append(L"..X.");
-	tetromino[4].append(L".XX.");
-	tetromino[4].append(L"..X.");
-	tetromino[4].append(L"....");
-
-	tetromino[5].append(L"....");
-	tetromino[5].append(L".XX.");
-	tetromino[5].append(L"..X.");
-	tetromino[5].append(L"..X.");
-
-	tetromino[6].append(L"....");
-	tetromino[6].append(L".XX.");
-	tetromino[6].append(L".X..");
-	tetromino[6].append(L".X..");
+	tetromino[0].append(L"..X...X...X...X.");
+	tetromino[1].append(L"..X..XX..X......");
+	tetromino[2].append(L".X...XX...X.....");
+	tetromino[3].append(L".....XX..XX.....");
+	tetromino[4].append(L"..X..XX...X.....");
+	tetromino[5].append(L".....XX...X...X.");
+	tetromino[6].append(L".....XX..X...X..");
 
 	pField = new unsigned char[nFieldWidth * nFieldHeight];
 	for (int x{ 0 }; x < nFieldWidth; ++x)
@@ -107,12 +86,6 @@ int main()
 			pField[y * nFieldWidth + x] = (x == 0 || x == nFieldWidth - 1 || y == nFieldHeight - 1) ? 9 : 0;
 		}
 	}
-
-	wchar_t *screen{ new wchar_t[nScreenWidth * nScreenHeight] };
-	for (int i{ 0 }; i < (nScreenWidth * nScreenHeight); ++i) { screen[i] = L' '; }
-	HANDLE hConsole{ CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL) };
-	SetConsoleActiveScreenBuffer(hConsole);
-	DWORD dwBytesWritten{ 0 };
 
 	bool bGameOver{ false };
 
@@ -146,15 +119,10 @@ int main()
 			bKey[k] = (0x8000 & GetAsyncKeyState((unsigned char)("\x27\x25\x28R"[k]))) != 0;
 		}
 
-		//bKey[0] = (0x8000 & GetAsyncKeyState(VK_LEFT)) != 0;
-		//bKey[1] = (0x8000 & GetAsyncKeyState(VK_RIGHT)) != 0;
-		//bKey[2] = (0x8000 & GetAsyncKeyState(VK_DOWN)) != 0;
-		//bKey[3] = (0x8000 & GetAsyncKeyState(0x52)) != 0; // R
-
 		// Game Logic
 		nCurrentX += (bKey[0] && doesPieceFit(nCurrentPiece, nCurrentRotation, nCurrentX + 1, nCurrentY)) ? 1 : 0;
 		nCurrentX -= (bKey[1] && doesPieceFit(nCurrentPiece, nCurrentRotation, nCurrentX - 1, nCurrentY)) ? 1 : 0;
-		nCurrentX += (bKey[2] && doesPieceFit(nCurrentPiece, nCurrentRotation, nCurrentX, nCurrentY + 1)) ? 1 : 0;
+		nCurrentY += (bKey[2] && doesPieceFit(nCurrentPiece, nCurrentRotation, nCurrentX, nCurrentY + 1)) ? 1 : 0;
 
 		if (bKey[3])
 		{
@@ -168,6 +136,8 @@ int main()
 
 		if (bForceDown)
 		{
+			nSpeedCount = 0;
+
 			if (doesPieceFit(nCurrentPiece, nCurrentRotation, nCurrentX, nCurrentY + 1))
 			{
 				++nCurrentY;
@@ -177,7 +147,7 @@ int main()
 				// Lock the current piece in the field
 				for (int px{ 0 }; px < 4; ++px)
 				{
-					for (int py{ 0 }; py < 4; ++px)
+					for (int py{ 0 }; py < 4; ++py)
 					{
 						if (tetromino[nCurrentPiece][Rotate(px, py, nCurrentRotation)] != L'.') // Was == L'X'
 						{
@@ -205,15 +175,16 @@ int main()
 						{
 							bLine &= (pField[(nCurrentY + py) * nFieldWidth + px]) != 0;
 
-							if (bLine)
-							{
-								for (int px{ 1 }; px < nFieldWidth - 1; ++px)
-								{
-									pField[(nCurrentY + py) * nFieldWidth + px] = 8;
-								}
+						}
 
-								vLines.push_back(nCurrentY + py);
+						if (bLine)
+						{
+							for (int px{ 1 }; px < nFieldWidth - 1; ++px)
+							{
+								pField[(nCurrentY + py) * nFieldWidth + px] = 8;
 							}
+
+							vLines.push_back(nCurrentY + py);
 						}
 					}
 				}
@@ -233,8 +204,6 @@ int main()
 				// If the piece does not fit
 				bGameOver = !doesPieceFit(nCurrentPiece, nCurrentRotation, nCurrentX, nCurrentY);
 			}
-
-			nSpeedCount = 0;
 		}
 
 		// Render Output
