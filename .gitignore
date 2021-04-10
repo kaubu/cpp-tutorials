@@ -5,8 +5,6 @@ Debug/
 Release/
 x64/
 bin/
-*.pdf
-*.txt
 
 # Prerequisites
 *.d
