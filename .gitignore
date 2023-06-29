@@ -1,0 +1,76 @@
+# Custom
+.vscode/
+.vs/
+Debug/
+Release/
+x64/
+bin/
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# KDevelop
+# general
+apidocs
+.directory
+.kdev4
+build
+*~
+*.patch
+*.diff
+*.bak
+*.orig
+*.pyc
+*.rej
+*.swp
+doxygen.log
+Doxyfile
+*.kdevelop
+*.kdevelop.filelist
+*.kdevelop.pcs
+*.kdevses
+.*kate-swp
+build/
+mem.log.*
+massif.*
+callgrind.*
+perf.data*
+
+# from kdiff3
+*.BACKUP.*
+*.BASE.*
+*.LOCAL.*
+*.REMOTE.*
+
+# do not ignore .kdev4 files from test data
+!projectmanagers/custom-buildsystem/tests/projects/**/.kdev4
